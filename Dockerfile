@@ -1,11 +1,14 @@
 FROM ubuntu:latest
 MAINTAINER MaLu <malu@malu.me> 
 
+ADD sources.list /etc/apt/sources.list
+
 # Install packages
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install openssh-server pwgen
 RUN mkdir -p /var/run/sshd && sed -i "s/UsePrivilegeSeparation.*/UsePrivilegeSeparation no/g" /etc/ssh/sshd_config && sed -i "s/UsePAM.*/UsePAM no/g" /etc/ssh/sshd_config && sed -i "s/PermitRootLogin.*/PermitRootLogin yes/g" /etc/ssh/sshd_config
 RUN apt-get install -y build-essential g++ curl libssl-dev git vim libxml2-dev python-software-properties software-properties-common byobu htop man unzip lrzsz wget supervisor apache2 libapache2-mod-php5 redis-server php5-redis pwgen php-apc php5-mcrypt && \
   echo "ServerName localhost" >> /etc/apache2/apache2.conf
+RUN apt-get install -y python-pip python-pyside xvfb
 
 # Add files.
 ADD home/.bashrc /home/.bashrc
@@ -29,6 +32,11 @@ RUN a2enmod rewrite
 
 RUN mkdir -p /app/www && rm -fr /var/www/html && ln -s /app/www /var/www/html
 RUN mkdir -p /app/data
+
+RUN mkdir /root/.pip
+ADD pip.conf /root/.pip/pip.conf
+ADD msyh.ttf /usr/share/fonts/msyh.ttf
+RUN fc-cache
 
 ENV HOME /root
 ENV REDIS_DIR /app/data
